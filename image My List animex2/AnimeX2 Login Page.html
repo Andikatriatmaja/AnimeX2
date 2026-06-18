@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimeX2 Login</title>
+
+    <style>
+        * {
+            margin: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+
+            background: 
+                linear-gradient( 
+                    rgba(0, 0, 0, 0.75), 
+                    rgba(0, 0, 0, 0.75)
+                    ),
+
+url("solev.jpg");
+
+            background-size: cover;
+            background-position: center;
+        }
+
+         h1 {
+            color: #7dd3fc;
+            font-size: 40px;
+            text-shadow:  0 0 10px #38bdf8, 
+                          0 0 20px #4f46e5;
+        }
+
+
+        .login-box {
+            width: 450px;
+            min-height: 550px;
+            padding: 35px 40px;
+            background: rgba(20,20,30,0.88);
+            border-radius: 20px;
+            text-align: center;
+            color: black;
+            border: 1px solid rgba(120,150,255,0.4);
+            animation: shadowAura 3s infinite alternate;
+        }
+
+        @keyframes shadowAura {
+            from {
+                box-shadow: 
+                    0 0 15px black,
+                    0 0 30px purple;
+            }
+
+            to {
+                box-shadow: 
+                    0 0 25px blueviolet,
+                    0 0 50px aquamarine,
+                    0 0 70px blueviolet;
+            }
+        }
+        
+
+        h1 {
+            font-size: 38px;
+            margin-bottom: 10px;
+            color: #9ca7ff;
+            
+        }
+
+        .subtitle {
+            margin-bottom: 25px;
+            color: #d0d0d0;
+        }
+
+        input::placeholder {
+            color: black;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(50deg,blueviolet,blue);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 15px black,
+                0 0 35px black;
+        }
+
+        .quote {
+            margin-top: 25px;
+            color: white;
+            font-style: Monospace;
+            font-size: 14px;
+        }
+
+        .profile-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #4f46e5;
+            box-shadow: 
+                0 0 15px #4f46e5,
+                0 0 30px purple;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="login-box">
+       
+        <div class="profile-container">
+            <img
+                src="solev.jpg"
+                class="profile-img"
+                alt="Profile"
+            >
+       </div>
+
+        <h1>AnimeX2</h1>
+
+        <p class="subtitle">My List AnimeX2 Login</p>
+
+        <form onsubmit="return login()">
+
+            <input
+                type="text"
+                id="username"
+                placeholder="Username"
+                required
+            >
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Passsword"
+                required
+            >
+
+            <p id="pesan" style="color:red;"></p>
+            <button type="submit">
+                LOGIN
+            </button>
+
+        </form>
+
+        <p class="quote">
+            "Anime hanya untuk hiburan dan karya fiktif belaka."
+        </p>
+        
+    </div>
+
+    <script>
+        function getBonusMultiplier(level) {
+            if (level <= 20) {
+                return 1.7;
+            }
+
+            else if (level <= 40) {
+                return 1.6;
+            }
+
+            else if (level <= 60) {
+                return 1.5;
+            }
+
+            return 1;
+        }
+
+        function login() {
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            let player = JSON.parse(localStorage.getItem("animex2Player"));
+
+            if (
+                player &&
+                username === player.username &&
+                password === player.password
+            ){
+
+        localStorage.setItem("isLoggedIn", "true");
+
+            if (!player) {
+
+                player = {
+                    username: "Xiao an",
+                    password: "123456789",
+                    profileImage: "",
+                    bio: "Anime Lovers",
+                    level: 1,
+                    exp: 0,
+                    rank: "E-Lovers",
+                    lastLogin: "",
+                    collectedAnime: [], 
+                    path: "",
+                    isAdmin: true
+                };
+
+                localStorage.setItem(
+                    "animex2Player",
+                    JSON.stringify(player)
+                );
+            }
+
+            const now = new Date();
+
+            const today =
+                now.getFullYear() + "-" +
+                String(now.getMonth() +1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+            
+
+            if (player.lastLogin !== today) {
+
+                const bonus =
+            getBonusMultiplier(player.level);
+
+                const gainedExp =
+                Math.round(10 * bonus);
+
+                player.exp += gainedExp;
+
+                player.lastLogin = today;
+                    
+                while (
+                    player.level < 99 &&
+                    player.exp >= 200
+                ){
+                    player.exp -= 200;
+
+                    player.level++;
+
+                    if (player.level <= 10){
+                        player.rank = "E-Lovers";
+                    }
+
+                    else if (player.level <= 20){
+                        player.rank = "D-Lovers";
+                    }
+
+                    else if (player.level <= 30){
+                        player.rank = "C-Lovers";
+                    }
+
+                    else if (player.level <= 40){
+                        player.rank = "B-Lovers";
+                    }
+
+                    else if (player.level <= 50){
+                        player.rank = "A-Lovers";
+                    }
+
+                    else if (player.level <= 60){
+                        player.rank = "S-Lovers";
+                    }
+
+                    else if (player.level <= 70){
+                        player.rank = "SS-Lovers";
+                    }
+
+                    else if (player.level <= 80){
+                        player.rank = "SSS-Lovers";
+                    }
+
+                    else if (player.level <= 90){
+                        player.rank = "Legendary-Lovers";
+                    }
+
+                    else {
+                        player.rank = "The Guild Master";
+                    }
+                }
+
+                alert (
+                    "Login Harian!\n" +
+                    "+" + gainedExp +
+                    "EXP diperoleh."
+                );
+
+                localStorage.setItem (
+                "animex2Player",
+                JSON.stringify(player)
+            );
+                
+            }
+                 window.location.href = "My List AnimeX2.html";
+            }
+
+            else {
+               document.getElementById("pesan").textContent = "Username atau Password salah!, Silahkan coba lagi.";
+            }
+
+            return false;
+       
+        }
+    </script>
+    
+</body>
+</html>

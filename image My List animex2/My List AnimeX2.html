@@ -1,0 +1,1561 @@
+ <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My List AnimeX2</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            color: white;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, rgba(79,70,229,0.25),transparent 40%),
+                        linear-gradient(to bottom, #050814, #0d1020, #050814 );
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(0,0,0,0.7);
+            border-bottom: 2px solid rgba(125,211,252,0.4);
+            box-shadow: 0 0 20px #4f46e5;
+        }
+
+        header h1 {
+            color: #7dd3fc;
+            font-size: 40px;
+            text-shadow:  0 0 10px #38bdf8, 
+                          0 0 20px #4f46e5;
+        }
+
+        header p {
+            margin-top: 10px;
+            color: #cbd5e1;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(240px, 1fr));
+            gap: 25px;
+            padding: 30px;
+        }
+
+        .anime-card {
+            position: relative;
+            overflow: hidden;
+            background: rgba(15,23,42,0.95);
+            border-radius: 20px;
+            border: 1px solid rgba(99,102,241,0.5);
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(79,70,229,0.4);
+        }
+
+        .anime-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 15px #6366f1, 0 0 30px rgba(99,102,241,0.5);
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+
+            width: 55px;
+            height: 55px;
+
+            border-radius: 50%;
+            background: linear-gradient(135deg,#312e81,#6366f1);
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-weight: bold;
+            font-size: 18px;
+
+            box-shadow: 0 0 10px #6366f1, 0 0  20px #4f46e5;
+        }
+
+        .corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #7dd3fc;
+            opacity: 0.7;
+        }
+
+        .corner-top {
+            top: 10px;
+            right: 10px;
+            border-left: "none";
+            border-bottom: "none";
+        }
+
+        .corner-bottom {
+            bottom: 10px;
+            left: 10px;
+            border-right: "none";
+            border-top: "none";
+        }
+
+        .anime-card img {
+            width: 100%;
+            height: 340px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .anime-title {
+            text-align: center;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: bold;
+        }   
+
+        .modal {
+            display: none;
+            position: fixed;;
+            inset: 0;
+            
+            background: rgba(0,0,0,0.75);
+
+            justify-content: center;
+            align-items: center;
+
+            z-index: 999;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 550px;
+
+            background: #0f172a;
+
+            border: 2px solid #6366f1;
+            border-radius: 20px;
+
+            padding: 25px;
+
+            box-shadow: 0 0 20px #6366f1, 0 0 40px rgba(99,102,241,0.5);
+
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content img {
+            width: 100%;
+            max-height: 350px;
+            object-fit: cover;
+
+            border-radius: 15px;
+
+            margin: 15px 0;
+        }
+
+        .modal-content h2 {
+            color: #7dd3fc;
+            margin-bottom: 10px;
+        }
+
+        .modal-content p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .close {
+            float: right;
+            font-size: 32px;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #7dd3fc;
+        }
+
+        @keyframes fadeIn {
+            from{
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to{
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .player-profile {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            margin: 30px;
+            padding: 25px;
+            background: rgba(15,23,42,0.9);
+            border-radius: 20px;
+            border: 1px solid #6366f1;
+            box-shadow: 
+                0 0 15px #4f46e5,
+                0 0 30px purple;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .exp-bar {
+            position: relative;
+            width: 100%;
+            height: 20px;
+            background: #1e293b;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+
+        }
+
+        #expPercent {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2; 
+        }
+
+        .exp-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, rgb(31, 31, 248),blue);
+            transition: 0.5s;
+            box-shadow:
+                0 0 10px black,
+                0 0 20px gray;
+        }
+
+        .player-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid black;
+            box-shadow: 
+                0 0 15px #7dd3fc,
+                0 0 30px purple;
+        }
+
+        .admin-badge {
+           display: inline-block;
+           margin-left: 6px;
+           color: #ffffff;
+           background: #1d9bf0;
+           width: 20px;
+           height: 20px;
+           border-radius: 50%;
+           text-align: center;
+           line-height: 20px;
+           font-size: 12px;
+           font-weight: bold;
+           box-shadow: 
+               0 0 5px #1e293b,
+               0 0 10px purple,
+               0 0 20px purple;
+       }
+
+       .edit-menu {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+       }
+
+       .edit-box {
+        width: 320px;
+        background: #0f172a;
+        border-radius: 20px;
+        padding: 25px;
+        border: 1px solid #050814;
+        box-shadow: 
+            0 0 20px #7dd3fc,
+            0 0 40px purple;
+       }
+
+       .edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+       }
+
+       .edit-header h2 {
+        margin: 0;
+       }
+
+       .close-btn {
+        font-size: 28px;
+        cursor: pointer;
+        color: white;
+        transition: 0.3s;
+       }
+
+       .close-btn:hover {
+        color: purple;
+        transform: scale(1.2);
+       }
+
+       .edit-box h2 {
+        text-align: center;
+        margin-bottom: 20px;
+       }
+
+       .edit-box button {
+        width: 100%;
+        margin: 8px 0;
+        padding: 14px 18px;
+        background: #2f2f2f;
+        color: white;
+        border: none;
+        border-radius: 18px;
+        text-align: left;
+        cursor: pointer;
+        transition: 0.25s;
+       }
+
+       .btn-edit-profile {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #2f2f2f);
+        color: white;
+        border: 1px solid rgba(125,211,252,0.6);
+        border-radius: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 0 15px rgba(79,70,229,0.6);
+        transition: all 0.3s ease;
+       }
+       
+       .btn-edit-profile:hover {
+        transform: translateY(-2px) scale(1.05);
+        border: 1px solid #050814;
+        box-shadow: 
+            0 0 25px #7dd3fc, 
+            0 0 10px purple;
+        background: linear-gradient(135deg, #0f172a, #2f2f2f);
+       }
+
+       @media (max-width: 600px) {
+        .btn-edit-profile {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            font-size: 13px;
+          }
+       }
+
+        @media(max-width:600px) {
+            header h1{
+                font-size: 30px;
+            }
+
+            .anime-card img {
+                height: 300px;
+            }
+        }
+
+
+    </style>
+</head>
+
+<body>
+
+ <button class="btn-edit-profile" onclick="openEditMenu()">
+             Edit Profile
+        </button>
+
+<header>
+    <h1>My List AnimeX2</h1>
+    <p>Daftar anime yang telah kutonton✨</p>
+    <h5><q>Rating berdasarkan pendapat pribadi</q></h5>
+    
+    <p>
+
+        Anime Favorit: Gintama
+        <br>
+        Karakter Favorit: Enma Ai
+        <br>
+        Genre Favorit: Action, Comedy, Mystery
+        <br>
+        Episode Favorit: Hell Girl S3 eps 26
+        <br>
+        Waifu: tidak ada. ( Bangunlah kawan, itu hanya 2D ) 
+        <br>
+    📌Note: Anime itu hanya untuk hiburan dan fiktif belaka, mohon jangan samakan dengan kehidupan nyata.
+    </p>
+</header>
+
+<section class="player-profile">
+
+    <img id="profileImage"
+         src="denji.jpg"
+         class="player-avatar">
+
+    <div class="player-info">
+
+        <h2 id="playerName">Xiao an</h2>
+
+        <p id="playerBio">
+            Anime Lovers
+        </p>
+
+        <P>
+            Rank :
+            <span id="playerRank">
+                E-Lovers
+            </span>
+        </P>
+
+        <p>
+           Level :
+           <span id="playerLevel">
+                1
+           </span> 
+        </p>
+
+        <p>
+            EXP :
+            <span id="playerExp">
+                0 / 200
+            </span>
+        </p>
+
+        <div class="exp-bar">
+
+            <div class="exp-fill" id=expFill>
+                <span id="expPercent">0%</span>
+            </div>
+
+        </div>
+        
+        <input
+            type="file"
+            id="uploadPhoto"
+            accept="image"
+            style="display:none"
+            onchange="changePhoto(event)"
+        >
+
+    </div>
+
+</section>
+
+<div class="container" id="animeContainer"></div>
+
+<div class="modal" id="modal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeModal()">&times;</span>
+
+        <h2 id="modalTitle"></h2>
+
+        <img id="modalImage" src="" alt="">
+
+        <p><strong>&bull; Sinopsis:</strong></p>
+        <p id="modalSinopsis"></p>
+
+        <p>
+            <strong>&bull; Genre:</strong>
+            <span id="modalGenre"></span>
+        </p>
+
+        <p>
+            <strong>&bull; Rating: </strong>
+            <span id="modalRating"></span>
+        </p>
+
+        <p><strong>&bull; Recommended:</strong></p>
+        <p id="modalPendapat"></p>
+
+    </div>
+
+</div>
+
+<script>
+
+function addAnimeExp (animeTitle) {
+
+    if (player.level >= 90) {
+        return;
+    }
+
+    if (!player.collectedAnime) {
+        player.collectedAnime = [];
+    }
+
+    if (!player.collectedAnime.includes(animeTitle)) {
+        player.collectedAnime.push(animeTitle);
+
+        const totalAnime =
+        player.collectedAnime.length;
+
+        if (totalAnime % 10 === 0){
+            player.exp += 50;
+
+            alert(
+                "🏅Achievement Unlocked!\n" +
+                "Anime Lovers" +
+                (totalAnime / 10) +
+                "\n+50 EXP"
+            );
+        }
+        const gainedExp = 25;
+        player.exp += gainedExp;
+
+        alert("✨ +25 Exp\nAnime baru telah ditonton!");
+        levelUp();
+        localStorage.setItem(
+            "animex2Player",
+            JSON.stringify(player)
+        );
+    }
+}
+
+const animeList = [
+    {
+        judul: "Dragon Ball",
+        gambar: "dragonball.jpg.jpg",
+        sinopsis: "Mengikuti perjalanan Son Goku sejak kecil mencari Dragon Ball sambil melatih kemampuan bertarungnya dan menghadapi berbagai musuh kuat.",
+        genre: "Action, Adventure, Martial Arts, Fantasy, Comedy",
+        rating: "8,5",
+        pendapat: "Coba aja dulu",
+    },
+
+    {
+        judul: "Attack On Titan",
+        gambar: "aot.jpg",
+        sinopsis: "Eren Yeager bergabung dengan pasukan militer untuk melawan Titan setelah kampung halamannya dihancurkan, sambil mengungkap rahasia dunia di balik tembok raksasa.",
+        genre: "Action, Dark Fantasy, Drama, Mystery",
+        rating: "8,7",
+        pendapat: "Worth It",
+    },
+
+    {
+        judul: "Hunter x Hunter",
+        gambar: "hxh.jpg",
+        sinopsis: "Gon Freecss bercita-cita menjadi Hunter demi menemukan ayahnya yang legendaris, melalui ujian berbahaya dan petualangan besar.",
+        genre: "Adventure, Fantasy, Action",
+        rating: "8,5",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Solo Leveling",
+        gambar: "solev.jpg",
+        sinopsis: "Sung Jinwoo, hunter terlemah, memperoleh kemampuan unik untuk terus naik level hingga menjadi salah satu manusia terkuat.",
+        genre: "Action, Fantasy, Adventure",
+        rating: "8,8",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "Spy x Family",
+        gambar: "sxf.jpg",
+        sinopsis: "Seorang mata-mata membentuk keluarga palsu tanpa mengetahui bahwa istrinya adalah pembunuh bayaran dan anak angkatnya seorang telepat.",
+        genre: "Comedy, Action, Slice of Life",
+        rating: "8,6",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "Saga of Tanya the Evil",
+        gambar: "tanya.jpg",
+        sinopsis: "Seorang pria bereinkarnasi menjadi gadis kecil bernama Tanya di dunia perang penuh sihir dan berusaha melawan takdir.",
+        genre: "Action, Military, Isekai",
+        rating: "7,5",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "Frieren: Beyond Journey's End",
+        gambar: "frieren.jpg",
+        sinopsis: "Setelah mengalahkan Raja Iblis, Frieren memulai perjalanan baru untuk memahami arti hubungan dan waktu yang singkat bagi manusia.",
+        genre: "Fantasy, Adventure, Drama",
+        rating: "9,0",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "Tokyo Ghoul",
+        gambar: "tg.jpg",
+        sinopsis: "Ken Kaneki berubah menjadi setengah ghoul dan harus bertahan hidup di antara manusia dan makhluk pemakan manusia.",
+        genre: "Action, Horror, Supernatural",
+        rating: "8,8",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "Tokyo Revengers",
+        gambar: "tr.jpg",
+        sinopsis: "Takemichi kembali ke masa lalu untuk menyelamatkan orang-orang yang dicintainya dan mengubah masa depan geng Tokyo Manji.",
+        genre: "Action, Drama, Time Travel",
+        rating: "8,5",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "The Apothecary Diaries",
+        gambar: "mao.jpg",
+        sinopsis: "Maomao, gadis cerdas pecinta obat-obatan, memecahkan berbagai misteri di dalam istana kekaisaran.",
+        genre: "Mystery, Historical, Drama",
+        rating: "8,6",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Sengoku Basara",
+        gambar: "basara.jpg",
+        sinopsis: "Kisah para panglima perang Jepang yang bertarung demi menyatukan negeri pada era Sengoku.",
+        genre: "Action, Historical",
+        rating: "8,0",
+        pendapat: "Skip",
+    },
+
+     {
+        judul: "Assassination Classroom",
+        gambar: "ac.jpg",
+        sinopsis: "Murid-murid Kelas 3-E diberi tugas membunuh guru mereka, Koro-sensei, sebelum ia menghancurkan Bumi.",
+        genre: "Comedy, School, Action",
+        rating: "9,3",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "Gintama ⭐",
+        gambar: "pler.jpg",
+        sinopsis: "Gintoki Sakata menjalani kehidupan sebagai pekerja serabutan di Edo yang telah dikuasai alien, dipenuhi humor dan pertarungan epik.",
+        genre: "Comedy, Action, Sci-Fi",
+        rating: "9,5",
+        pendapat: "Absolute Cinema",
+    },
+
+     {
+        judul: "Rurouni Kenshin (2023)",
+        gambar: "kenshin.jpg",
+        sinopsis: "Mantan pembunuh legendaris Kenshin Himura berusaha menebus dosa masa lalunya dengan melindungi orang lain.",
+        genre: "Action, Historical, Drama",
+        rating: "8,4",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Violet Evergarden",
+        gambar: "violet.jpg",
+        sinopsis: "Violet, mantan prajurit perang, belajar memahami emosi manusia melalui pekerjaannya menulis surat.",
+        genre: "Drama, Slice of Life",
+        rating: "8,0",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Akame Ga Kill!!",
+        gambar: "akame.jpg",
+        sinopsis: "Tatsumi bergabung dengan Night Raid, kelompok pembunuh yang melawan pemerintahan korup.",
+        genre: "Action, Dark Fantasy, Drama",
+        rating: "8,7",
+        pendapat: "Worth It muehehe",
+    },
+
+     {
+        judul: "Yamada-kun and the Seven Witches",
+        gambar: "ymd.jpg",
+        sinopsis: "Yamada menemukan bahwa ia dapat bertukar tubuh melalui ciuman dan terlibat dengan tujuh penyihir sekolah.",
+        genre: "Comedy, Romance, Supernatural",
+        rating: "8,5",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "Classroom Of The Elite",
+        gambar: "cote.jpg",
+        sinopsis: "Ayanokoji menghadapi persaingan dan manipulasi di sekolah elit yang menentukan masa depan siswanya.",
+        genre: "Psychological, School, Drama",
+        rating: "8,5",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "The Eminence In Shadow",
+        gambar: "shadow.jpg",
+        sinopsis: "Cid Kagenou berpura-pura menjadi dalang organisasi rahasia, tanpa sadar bahwa musuh yang ia ciptakan benar-benar ada.",
+        genre: "Action, Comedy, Isekai",
+        rating: "8,5",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Dusk Maiden of Amnesia",
+        gambar: "dmoa.jpg",
+        sinopsis: "Teiichi berteman dengan hantu gadis bernama Yuuko untuk mengungkap misteri kematiannya.",
+        genre: "Mystery, Romance, Supernatural",
+        rating: "8,5",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Welcome to the Outcast's Restaurant!",
+        gambar: "out.jpg",
+        sinopsis: "Seorang petualang yang dikhianati kelompoknya membuka restoran dan menyajikan makanan lezat bagi para pelanggan dari berbagai kalangan.",
+        genre: "Gourmet, fantasy, Comedy",
+        rating: "8,5",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "Clevatess",
+        gambar: "clen.jpg",
+        sinopsis: "Seorang Raja Iblis yang ditakuti terlibat dengan seorang bayi manusia, memulai perjalanan yang mengubah pandangannya terhadap dunia.",
+        genre: "Fantasy, Action, Adventure",
+        rating: "8,5",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Sakamoto Days",
+        gambar: "taro.jpg",
+        sinopsis: "Taro Sakamoto, mantan pembunuh bayaran legendaris yang kini hidup sebagai pemilik toko kelontong, harus kembali menghadapi dunia bawah demi melindungi keluarganya.",
+        genre: "Action, Comedy",
+        rating: "",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "The Misfit of Demon King Academy",
+        gambar: "anos.jpg",
+        sinopsis: "Raja Iblis Anos Voldigoad bereinkarnasi setelah 2.000 tahun dan kembali ke akademi, tetapi justru dianggap tidak memenuhi standar sebagai Raja Iblis.",
+        genre: "Fantasy, Action, School",
+        rating: "8,6",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Chainsaw Man",
+        gambar: "denji.jpg",
+        sinopsis: "Denji, pemuda miskin yang dibebani utang, bergabung dengan iblis gergaji Pochita dan menjadi pemburu iblis demi menjalani kehidupan normal.",
+        genre: "Action, Horror, Dark Fantasy",
+        rating: "8,7",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "Tougen Anki",
+        gambar: "anki.jpg",
+        sinopsis: "Konflik antara keturunan Oni dan Momotaro kembali memanas ketika seorang remaja menemukan jati dirinya di tengah peperangan tersebut.",
+        genre: "Action, Supernatural, Fantasy",
+        rating: "",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Uma Musume: Cinderella Gray",
+        gambar: "oguri.jpg",
+        sinopsis: "Berfokus pada perjalanan Oguri Cap, Uma Musume berbakat dari daerah yang berjuang keras untuk mencapai puncak dunia balap nasional.",
+        genre: "Sports, Drama",
+        rating: "9,1",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Dororo",
+        gambar: "dororo.jpg",
+        sinopsis: "Hyakkimaru melakukan perjalanan untuk merebut kembali bagian tubuhnya yang dicuri para iblis, ditemani seorang anak yatim bernama Dororo.",
+        genre: "Action, Historical, Supernatural",
+        rating: "9,2",
+        pendapat: "Hidden Gems",
+    },
+
+     {
+        judul: "WitchWatch",
+        gambar: "WW.jpg",
+        sinopsis: "Seorang penyihir muda tinggal bersama sahabat masa kecilnya yang merupakan ogre demi menghadapi berbagai kejadian ajaib yang kocak.",
+        genre: "Comedy, Romance, Supernatural",
+        rating: "8,3",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Re:CREATORS",
+        gambar: "cre.jpg",
+        sinopsis: "Karakter-karakter dari dunia anime, manga, dan game muncul di dunia nyata, menyebabkan kekacauan yang harus dihentikan.",
+        genre: "Action, Fantasy, Sci-Fi",
+        rating: "8,4",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "Mashle: Magic and Muscles",
+        gambar: "mash.jpg",
+        sinopsis: "Di dunia sihir, Mash Burnedead yang tidak memiliki kekuatan sihir mengandalkan ototnya untuk menghadapi berbagai tantangan.",
+        genre: "Action, Comedy, Fantasy",
+        rating: "9,0",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "86: Eighty-Six",
+        gambar: "86.jpg",
+        sinopsis: "Pasukan 86 yang dianggap 'bukan manusia' dipaksa bertarung melawan mesin perang otonom demi melindungi negaranya.",
+        genre: "Action, Military, Drama, Sci-Fi",
+        rating: "8,8",
+        pendapat: "Hidden Gems",
+    },
+
+     {
+        judul: "Goblin Slayer",
+        gambar: "gs.jpg",
+        sinopsis: "Seorang petualang yang dikenal sebagai Goblin Slayer mendedikasikan hidupnya untuk membasmi goblin tanpa ampun.",
+        genre: "Action, Dark Fantasy, Adventure",
+        rating: "8,3",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "This Monster Wants to Eat Me",
+        gambar: "oumi.jpg",
+        sinopsis: "Seorang gadis bertemu monster yang ingin memangsanya suatu hari nanti, menciptakan hubungan yang aneh dan penuh emosi.",
+        genre: "Drama, Supernatural, Psychological",
+        rating: "8,4",
+        pendapat: "Skip",
+    },
+
+     {
+        judul: "Buddy Daddies",
+        gambar: "dad.jpg",
+        sinopsis: "Dua pembunuh bayaran mendadak harus merawat seorang anak kecil yang tanpa sengaja masuk ke kehidupan mereka.",
+        genre: "Action, Comedy, Slice of Life",
+        rating: "8,6",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Charlotte",
+        gambar: "char.jpg",
+        sinopsis: "Yuu Otosaka memiliki kemampuan khusus untuk merasuki orang lain selama beberapa detik, tetapi hidupnya berubah setelah bertemu siswa berkekuatan super lainnya.",
+        genre: "Drama, Supernatural, School",
+        rating: "8,5",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Higurashi: When They Cry",
+        gambar: "rikaaa.jpg",
+        sinopsis: "Keiichi pindah ke desa Hinamizawa yang tampak damai, namun serangkaian pembunuhan misterius mengungkap sisi gelap desa tersebut.",
+        genre: "Horror, Mystery, Psychological",
+        rating: "8,5",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "Peach Boy Riverside",
+        gambar: "pbr.jpg",
+        sinopsis: "Putri Sally meninggalkan kerajaannya untuk menjelajahi dunia dan terlibat dalam konflik antara manusia dan iblis.",
+        genre: "Fantasy, Adventure, Action",
+        rating: "8,5",
+        pendapat: "Coba aja dulu *disclaimer dikit, untuk urutan nonton nya (4-1-2-7-11-12-5-6-3-8-10-9)",
+    },
+
+     {
+        judul: "Blue Archive the Animation",
+        gambar: "ba.jpg",
+        sinopsis: "Sensei tiba di kota akademi Kivotos untuk membantu para siswi memecahkan berbagai masalah dan ancaman yang terjadi.",
+        genre: "Action, School, Sci-Fi",
+        rating: "8,4",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "Mission: Yozakura Family",
+        gambar: "taiyo.jpg",
+        sinopsis: "Taiyo Asano menikah dengan sahabat masa kecilnya dan mendadak harus hidup di tengah keluarga mata-mata paling berbahaya di Jepang.",
+        genre: "Action, Comedy, Romance",
+        rating: "8,6",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "The Detective Is Already Dead",
+        gambar: "siesta.jpg",
+        sinopsis: "Kimizuka Kimihiko, mantan asisten detektif legendaris Siesta, mencoba menjalani hidup normal setelah kematian Siesta. Namun berbagai kasus baru kembali menyeretnya ke dalam misteri masa lalu.",
+        genre: "Mystery, Action, Romance, Drama",
+        rating: "8,4",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Another",
+        gambar: "another.jpg",
+        sinopsis: "Kouichi Sakakibara pindah ke kelas yang diselimuti kutukan mengerikan. Bersama Mei Misaki, ia berusaha mengungkap rahasia di balik rentetan kematian misterius.",
+        genre: "Horror, Mystery, Psychological, Supernatural",
+        rating: "8,7",
+        pendapat: "Worth It muehehe",
+    },
+
+     {
+        judul: "Welcome to Japan, Ms. Elf!",
+        gambar: "bangun mas.jpg",
+        sinopsis: "Seorang pria dapat berpindah antara dunia nyata dan dunia fantasi melalui mimpi. Suatu hari, peri elf yang menjadi temannya ikut terbawa ke Jepang.",
+        genre: "Fantasy, Romance, Slice of Life",
+        rating: "8,4",
+        pendapat: "Skip",
+    },
+
+     {
+        judul: "The Future Diary",
+        gambar: "yandere.jpg",
+        sinopsis: "Yukiteru Amano terlibat dalam permainan bertahan hidup antar pemilik 'diary' yang dapat memprediksi masa depan, dengan hadiah menjadi dewa baru.",
+        genre: "Psychological, Thriller, Action, Supernatural",
+        rating: "8,1",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Overlord",
+        gambar: "sasuga ainz-sama.jpg",
+        sinopsis: "Setelah game favoritnya ditutup, Momonga terjebak di dalamnya sebagai penguasa undead Ainz Ooal Gown dan memutuskan menjelajahi dunia baru tersebut.",
+        genre: "Isekai, Fantasy, Action",
+        rating: "8,6",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Devilman Crybabay",
+        gambar: "dc.jpg",
+        sinopsis: "Akira Fudo memperoleh kekuatan iblis untuk melawan ancaman demon, tetapi harus menghadapi sisi gelap manusia dan dirinya sendiri.",
+        genre: "Action, Horror, Psychological, Supernatural",
+        rating: "7,5",
+        pendapat: "Skip",
+    },
+
+     {
+        judul: "Love, Chunibyo & Other Delusions!",
+        gambar: "kang halu.jpg",
+        sinopsis: "Yuuta ingin melupakan masa lalunya yang memalukan, tetapi kehidupannya berubah ketika bertemu Rikka yang masih tenggelam dalam dunia khayalannya.",
+        genre: "Romance, Comedy, Slice of Life, School",
+        rating: "8,6",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Kemono Jihen",
+        gambar: "kemana cok.jpg",
+        sinopsis: "Kabane, anak laki-laki setengah ghoul, bergabung dengan biro detektif khusus untuk menyelidiki kasus-kasus yang melibatkan makhluk supernatural.",
+        genre: "Action, Mystery, Supernatural",
+        rating: "8,6",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Gate: Thus the JSDF Fought There!",
+        gambar: "gate.jpg",
+        sinopsis: "Sebuah gerbang menuju dunia fantasi muncul di Jepang. Pasukan Bela Diri Jepang dikirim untuk menghadapi ancaman sekaligus menjalin hubungan dengan penduduk dunia tersebut.",
+        genre: "Action, Fantasy, Military, Isekai",
+        rating: "8,4",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "Kaguya-sama: Love Is War",
+        gambar: "kaguya.jpg",
+        sinopsis: "Dua siswa jenius yang saling mencintai justru terlibat dalam 'perang' untuk membuat pihak lain menyatakan cinta terlebih dahulu.",
+        genre: "Romance, Comedy, School, Psychological",
+        rating: "8,7",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "Kaya-chan Isn't Scary",
+        gambar: "kaya.jpg",
+        sinopsis: "Kaya terlihat seperti anak TK biasa, tetapi tingkah lakunya yang aneh dan kemampuan misteriusnya sering membuat orang-orang di sekitarnya kewalahan.",
+        genre: "Horror, Supernatural, Slice of Life",
+        rating: "8,6",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Undead Girl Murder Farce",
+        gambar: "aya.jpg",
+        sinopsis: "Tsugaru dan Aya, seorang gadis abadi yang hanya tersisa kepalanya, memecahkan berbagai kasus misterius yang melibatkan makhluk legenda.",
+        genre: "Mystery, Supernatural, Historical",
+        rating: "8,6",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "The Family Circumstances of the Mismatched Witches",
+        gambar: "kok iso.jpg",
+        sinopsis: "Seorang penyihir bertubuh kecil membesarkan bayi manusia yang tumbuh menjadi wanita dewasa, menciptakan hubungan ibu-anak yang unik dan lucu.",
+        genre: "Comedy, Fantasy, Slice of Life",
+        rating: "8,0",
+        pendapat: "Skip",
+    },
+
+     {
+        judul: "Yona of the Dawn",
+        gambar: "yona.jpg",
+        sinopsis: "Putri Yona kehilangan kerajaan dan memulai perjalanan untuk mengumpulkan naga legendaris demi merebut kembali masa depannya.",
+        genre: "Adventure, Fantasy, Romance",
+        rating: "8,6",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "Dark Gathering",
+        gambar: "yayoi.jpg",
+        sinopsis: "Seorang anak jenius pemburu hantu mengajak mahasiswa yang bisa menarik roh jahat untuk mengumpulkan arwah demi tujuan tertentu.",
+        genre: "Horror, Supernatural, Mystery",
+        rating: "8,7",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "Nura: Rise of the Yokai Clan",
+        gambar: "nura.jpg",
+        sinopsis: "Rikuo Nura, pewaris klan yokai, berjuang menerima jati dirinya sebagai pemimpin para makhluk supranatural.",
+        genre: "Action, Supernatural, Fantasy",
+        rating: "8,6",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Chained Soldier",
+        gambar: "hell nah.jpg",
+        sinopsis: "Yuuki Wakura terseret ke dunia penuh monster dan menjadi 'budak' pasukan wanita elit yang bertugas melindungi manusia.",
+        genre: "Action, Fantasy, Supernatural",
+        rating: "8,5",
+        pendapat: "Skip",
+    },
+
+     {
+        judul: "The Demon King's Daughter Is Too Kind!!",
+        gambar: "doux.jpg",
+        sinopsis: "Putri Raja Iblis yang berhati baik mencoba membawa kedamaian meski dikelilingi para iblis yang menakutkan.",
+        genre: "Comedy, Fantasy, Slice of Life",
+        rating: "8,6",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "That Time I Got Reincarnated as a Slime",
+        gambar: "tensura.jpg",
+        sinopsis: "Satoru Mikami bereinkarnasi menjadi slime bernama Rimuru Tempest dan membangun bangsa tempat berbagai ras dapat hidup berdampingan.",
+        genre: "Isekai, Fantasy, Adventure",
+        rating: "8,5",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Wash It All Away",
+        gambar: "laundry.jpg",
+        sinopsis: "Mengisahkan keseharian santai para tokohnya yang dipenuhi momen-momen sederhana, hangat, dan menghibur.",
+        genre: "Slice of Life",
+        rating: "8,0",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "An Adventurer's Daily Grind at Age 29",
+        gambar: "succubus.jpg",
+        sinopsis: "Seorang petualang berusia 29 tahun menjalani kehidupan sehari-harinya sambil menghadapi berbagai tantangan dan pencarian kecil.",
+        genre: "Fantasy, Adventure, Slice of Life",
+        rating: "8,2",
+        pendapat: "Skip",
+    },
+
+     {
+        judul: "Arifureta: From Commonplace to World's Strongest",
+        gambar: "harem.jpg",
+        sinopsis: "Hajime Nagumo dikhianati teman-temannya dan jatuh ke jurang mematikan. Ia bangkit menjadi sosok yang jauh lebih kuat demi bertahan hidup.",
+        genre: "Isekai, Action, Fantasy",
+        rating: "8,4",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Playing Death Games to Put Food on the Table",
+        gambar: "makan.jpg",
+        sinopsis: "Seorang gadis mengikuti permainan mematikan demi mendapatkan uang untuk bertahan hidup, menghadapi pilihan moral yang berat.",
+        genre: "Psychological, Thriller, Drama",
+        rating: "8,3",
+        pendapat: "Mungkin Drop",
+    },
+
+     {
+        judul: "Bungou Stray Dogs",
+        gambar: "bsd.jpg",
+        sinopsis: "Atsushi Nakajima bergabung dengan Armed Detective Agency, organisasi yang beranggotakan pengguna kemampuan khusus untuk menyelesaikan berbagai kasus.",
+        genre: "Action, Mystery, Supernatural",
+        rating: "8,7",
+        pendapat: "Coba aja dulu",
+    },
+
+     {
+        judul: "Gosick",
+        gambar: "tsundere.jpg",
+        sinopsis: "Kazuya Kujo bekerja sama dengan Victorique yang jenius untuk memecahkan misteri-misteri rumit di negara fiktif Sauville.",
+        genre: "Mystery, Romance, Historical",
+        rating: "8,6",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "You and I Are Polar Opposites",
+        gambar: "sukatani.jpg",
+        sinopsis: "Dua siswa SMA dengan kepribadian yang sangat bertolak belakang perlahan memahami satu sama lain dan menjalin hubungan yang manis.",
+        genre: "Romance, Comedy, School",
+        rating: "8,6",
+        pendapat: "Worth It",
+    },
+
+     {
+        judul: "Hell Girl",
+        gambar: "gelooo.jpg",
+        sinopsis: "Orang yang menyimpan dendam dapat mengakses situs misterius pada tengah malam untuk mengirim target mereka ke neraka, tetapi harus membayar harga yang setara.",
+        genre: "Horror, Psychological, Supernatural",
+        rating: "8,8",
+        pendapat: "Coba aja dulu",
+    },
+];
+
+const container =
+document.getElementById("animeContainer");
+
+animeList.forEach((anime, index) => {
+
+    container.innerHTML += `
+
+        <div class="anime-card" onclick="showDetail(${index})">
+
+            <div class="rank-badge">
+                #${index + 1}
+            </div>
+
+            <div class="corner corner-top"></div>
+            <div class="corner corner-bottom"></div>
+
+            <img src="${anime.gambar}" alt="${anime.judul}">
+
+            <div class="anime-title">
+                ${anime.judul}
+            </div>
+
+        `;
+            
+});
+
+function showDetail(index) {
+
+    const anime = animeList[index];
+
+    addAnimeExp(anime.judul);
+
+document.getElementById("modalTitle").textContent = anime.judul;
+
+document.getElementById("modalImage").src = anime.gambar;
+
+document.getElementById("modalImage").alt = anime.judul;
+
+document.getElementById("modalSinopsis").textContent = anime.sinopsis;
+
+document.getElementById("modalGenre").textContent = anime.genre;
+
+document.getElementById("modalRating").textContent = anime.rating;
+
+document.getElementById("modalPendapat").textContent = anime.pendapat;
+
+document.getElementById("modal").style.display = "flex";
+
+}
+
+function closeModal() {
+
+document.getElementById("modal").style.display = "none";
+
+}
+
+window.onclick = function(event) {
+
+    const modal = 
+document.getElementById("modal");
+
+    if(event.target === modal) {
+        modal.style.display = "none";
+    }
+}
+
+let player = JSON.parse(
+    localStorage.getItem("animex2Player")
+);
+
+if (!player.password) {
+    player.password = "123456789";
+
+    localStorage.setItem(
+        "animex2Player",
+        JSON.stringify(player)
+    );
+}
+
+if(player && player.username === "Xiao an") {
+    player.isAdmin = true;
+    localStorage.setItem(
+        "animex2Player",
+        JSON.stringify(player)
+    );
+}
+
+if (!player) {
+
+    window.location.href = "AnimeX2 Login Page.html";
+}
+
+localStorage.setItem(
+    "animex2Player",
+
+    JSON.stringify(player)
+);
+
+updateRank(); 
+loadProfile();
+
+function loadProfile() {
+    const playerName = document.getElementById("playerName");
+
+    if(player.isAdmin) {
+        playerName.innerHTML = player.username + ' <span class="admin-badge">✔</span>';
+    } else {
+        playerName.textContent = player.username;
+    }
+    
+    document.getElementById("playerBio").textContent = player.bio;
+
+
+    while(player.level < 99 && player.exp >= 200){
+        player.exp -= 200;
+        player.level++;
+        updateRank(); 
+    }
+
+    const rankElement = document.getElementById("playerRank");
+    rankElement.textContent = player.rank;
+    rankElement.style.color = "";
+    rankElement.style.textShadow = "";
+
+    if(player.path === "Monarch") {
+        rankElement.style.color = "#a855f7";
+        rankElement.style.textShadow = "0 0 10px purple";
+    } else if(player.path === "Ruler") {
+        rankElement.style.color = "#facc15";
+        rankElement.style.textShadow = "0 0 10px gold";
+    }
+
+    document.getElementById("playerLevel").textContent = player.level;
+    document.getElementById("playerExp").textContent = player.exp + "/200";
+
+    if(player.profileImage) {
+        document.getElementById("profileImage").src = player.profileImage;
+    }
+    
+    const percent = Math.floor ((player.exp / 200) * 100);
+    document.getElementById("expFill").style.width = percent + "%";
+    document.getElementById("expPercent").textContent = percent + "%";
+}
+
+function levelUp() {
+    while(player.level < 99 && player.exp >= 200){
+        player.exp -= 200;
+        player.level++;
+        updateRank();
+        alert("⬆️LEVEL UP!\n" + "Your Level " + player.level);
+    }
+
+    if (player.level >= 99 && !player.path){
+        choosePath();
+    }
+}
+
+function updateRank() {
+    if (player.level <= 10){
+         player.rank = "E-Lovers";
+    } 
+    else if (player.level <= 20){
+        player.rank = "D-Lovers";
+    }
+    else if (player.level <= 30){
+        player.rank = "C-Lovers";
+    } 
+    else if (player.level <= 40){
+        player.rank = "B-Lovers";
+    } 
+    else if (player.level <= 50){
+        player.rank = "A-Lovers";
+    } 
+    else if (player.level <= 60){
+       player.rank = "S-Lovers";
+    } 
+    else if (player.level <= 70){
+        player.rank = "SS-Lovers";
+    } 
+    else if (player.level <= 80){
+        player.rank = "SSS-Lovers";
+    } 
+    else if (player.level <= 90){
+        player.rank = "Legendary-Lovers";
+    } 
+    else {
+        player.rank = "The Guild Master";
+    }
+
+    localStorage.setItem("animex2Player", JSON.stringify(player));
+}
+
+function toogleMusic() {
+    const bgm = document.getElementById("bgm");
+    const musicBtn = document.getElementById("musicBtn");
+    if (bgm.paused){
+        bgm.play();
+        musicBtn.textContent = "🔊Music ON";
+        localStorage.setItem("musicState","on");
+    } else {
+        bgm.pause();
+        musicBtn.textContent = "🔇Music OFF";
+        localStorage.setItem("musicState","off");
+    }
+}
+    function changePhoto(event) {
+
+        const file =
+        event.target.files[0];
+
+        if(!file){
+            return;
+        }
+
+        const reader =
+        new FileReader();
+
+        reader.onload = function(e){
+
+            player.profileImage =
+            e.target.result;
+
+            localStorage.setItem(
+                "animex2Player",JSON.stringify(player)
+            );
+
+            loadProfile();
+
+            alert(
+                "Profile telah diganti!"
+            );
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function logout() {
+
+        localStorage.removeItem(
+            "isLoggedIn"
+        );
+
+        window.location.href = "AnimeX2 Login Page.html";
+    }
+
+    function openEditMenu() {
+        document.getElementById("editMenu").style.display = "flex";
+    }
+
+    function closeEditMenu() {
+        document.getElementById("editMenu").style.display = "none";
+    }
+
+    function changeUsername() {
+        const newName = prompt(
+            "Masukkan username baru:",
+            player.username
+        );
+
+        if (newName){
+            player.username = newName;
+
+            localStorage.setItem(
+                "animex2Player",
+                JSON.stringify(player)
+            );
+
+            loadProfile();
+        }
+    }
+
+    function changeBio() {
+        const newBio = prompt(
+            "Masukkan Bio baru:",
+            player.bio 
+        );
+
+        if (newBio) {
+            player.bio = newBio;
+
+            localStorage.setItem(
+                "animex2Player",
+                JSON.stringify(player)
+            );
+
+            loadProfile();
+        }
+    }
+
+    function confirmLogout() {
+        if(confirm("Yakin mau logout?")) {
+            logout();
+        }
+    }
+
+    function changePassword() {
+
+        const oldPassword = prompt(
+            "Masukkan password lama:"
+        );
+
+        if (oldPassword !== player.password) {
+
+            alert("Password lama salah!");
+            return;
+        }
+
+        const newPassword = prompt(
+            "Masukkan Password baru:"
+        );
+
+        if (!newPassword) {
+            return;
+        }
+
+        player.password = newPassword;
+
+        localStorage.setItem(
+            "animex2Player",
+            JSON.stringify(player)
+        );
+
+        alert("Password berhasil diganti!");
+    }
+
+</script>
+
+<audio id="bgm" loop>
+    <source src="Angel with a Shotgun.mp3" type="audio/mpeg">
+</audio>
+
+<button id="musicBtn">🔊Music ON</button>
+
+<style>
+#musicBtn{
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    border: 1px solid #050814;
+    border-radius: 15px;
+    background: #2f2f2f;
+    box-shadow: 
+        0 0 10px #7dd3fc,
+        0 0 20px purple;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+}
+</style>
+
+<script>
+    const bgm = document.getElementById("bgm");
+    const musicBtn = document.getElementById("musicBtn");
+
+    let musicState = localStorage.getItem("musicState") || "on";
+
+    if (musicState === "on"){
+        bgm.play().catch(()=>{});
+        musicBtn.textContent = "🔊Music ON";
+    } else {
+        musicBtn.textContent = "🔇Music OFF";
+    }
+
+    musicBtn.onclick = () => {
+        if (bgm.paused){
+            bgm.play();
+            musicBtn.textContent = "🔊Music ON";
+            localStorage.setItem("musicState","on");
+        } else {
+            bgm.pause();
+            musicBtn.textContent = "🔇Music OFF";
+            localStorage.setItem("musicState","off");
+        }
+        
+    };
+
+</script>
+
+<div id="editMenu" class="edit-menu">
+    <div class="edit-box">
+
+        <div class="edit-header">
+        <h2>☰ Edit Profile</h2>
+
+        <span class="close-btn"onclick="closeEditMenu()">
+            ❌
+        </span>
+        </div>
+        <button onclick="document.getElementById('uploadPhoto').click()">
+            📷 Edit Foto Profil
+        </button>
+
+        <button onclick="changeUsername()">
+            👤 Edit Username
+        </button>
+
+        <button onclick="changePassword()">
+            🔒 Edit Password
+        </button>
+
+        <button onclick="changeBio()">
+            📝 Edit Bio
+        </button>
+
+        <button onclick="toogleMusic()">
+             🎵 Music ON/OFF
+        </button>
+
+        <button onclick="confirmLogout()">
+            📴 Logout
+        </button>
+
+    </div>
+</div>
+
+</body>
+</html>
